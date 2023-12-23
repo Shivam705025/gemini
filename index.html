@@ -49,6 +49,9 @@
       const text = response.text();
       console.log(text);
     }
+    
+  </script>
+  <script>
             async function processVideo() {
       const videoInput = document.getElementById('videoInput');
       const videoPlayer = document.getElementById('videoPlayer');
@@ -72,8 +75,6 @@
         alert('Please select a video file.');
       }
     }
-  </script>
-  <script>
     async function extractFrames(videoFile) {
       const videoPlayer = document.getElementById('videoPlayer');
       const canvas = document.createElement('canvas');
