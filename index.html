@@ -20,15 +20,13 @@
 
   <script type="module">
     import { GoogleGenerativeAI } from "@google/generative-ai";
-  </script>
-  <script>
-
-    // Replace 'YOUR_API_KEY' with your actual API key
-    const API_KEY = 'AIzaSyAnQWILIuamyHrwmVtp5EtqMGD3zFQC-rM';
+        const API_KEY = 'AIzaSyAnQWILIuamyHrwmVtp5EtqMGD3zFQC-rM';
     const prompt = "What's different between these pictures?";
 
     // Access your API key
     const genAI = new GoogleGenerativeAI(API_KEY);
+  </script>
+  <script>
 
     async function fileToGenerativePart(file) {
       const base64EncodedDataPromise = new Promise((resolve) => {
