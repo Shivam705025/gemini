@@ -9,18 +9,20 @@
   <input type="file" accept="video/*" id="videoInput" />
   <video controls id="videoPlayer" style="width: 100%; max-width: 800px;"></video>
   <button onclick="processVideo()">Process Video</button>
+  <br>
+  Result: <textarea id="resultTextArea" style="width: 100%; max-width: 800px; height: 100px;"></textarea>
 
-      <script type="importmap">
-      {
-        "imports": {
-          "@google/generative-ai": "https://esm.run/@google/generative-ai"
-        }
+  <script type="importmap">
+    {
+      "imports": {
+        "@google/generative-ai": "https://esm.run/@google/generative-ai"
       }
-    </script>
+    }
+  </script>
 
   <script type="module">
     import { GoogleGenerativeAI } from "@google/generative-ai";
-    // Replace 'YOUR_API_KEY' with your actual API key
+
     const API_KEY = 'AIzaSyAnQWILIuamyHrwmVtp5EtqMGD3zFQC-rM';
     const prompt = "What's different between these pictures?";
 
@@ -47,38 +49,42 @@
       const result = await model.generateContent([prompt, ...imageParts]);
       const response = await result.response;
       const text = response.text();
-      console.log(text);
+      return text;
     }
-    
-  </script>
-  <script>
-    async function processVideo() {
-      const videoInput = document.getElementById('videoInput');
-      const videoPlayer = document.getElementById('videoPlayer');
 
-      // Reset the video source and pause it
-      videoPlayer.src = '';
-      videoPlayer.pause();
+async function processVideo() {
+  const videoInput = document.getElementById('videoInput');
+  const videoPlayer = document.getElementById('videoPlayer');
+  const resultTextArea = document.getElementById('resultTextArea');
 
-      // Check if a video is selected
-      if (videoInput.files.length > 0) {
-        const videoFile = videoInput.files[0];
+  // Check if a video is selected
+  if (videoInput.files.length > 0) {
+    const videoFile = videoInput.files[0];
 
-        // Set the video source
-        videoPlayer.src = URL.createObjectURL(videoFile);
+    // Pause the video
+    videoPlayer.pause();
 
-        // Play the video
-        videoPlayer.play();
+    // Set the video source
+    videoPlayer.src = URL.createObjectURL(videoFile);
 
-        // Extract frames from the video
-        const frames = await extractFrames(videoFile);
+    // Load metadata to get video duration (optional)
+    await videoPlayer.load();
 
-        // Process frames using the AI model
-        await runAI(frames);
-      } else {
-        alert('Please select a video file.');
-      }
-    }
+    // Extract frames from the video
+    const frames = await extractFrames(videoFile);
+
+    // Process frames using the AI model
+    const result = await runAI(frames);
+
+    // Display result in the text area
+    resultTextArea.value = result;
+
+    // Play the video
+    videoPlayer.play();
+  } else {
+    alert('Please select a video file.');
+  }
+}
 
 
     async function extractFrames(videoFile) {
