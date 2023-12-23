@@ -3,23 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Video Analysis</title>
+  <title>Image Analysis</title>
 </head>
 <body>
-  <input type="file" accept="video/*" id="videoInput" />
-  <video controls id="videoPlayer" style="width: 100%; max-width: 800px;"></video>
-  <button onclick="processVideo()">Process Video</button>
+  <input type="file" accept="image/*" id="imageInput" />
+  <img id="imagePreview" style="max-width: 800px;" />
+  <button onclick="processImage()">Process Image</button>
 
-      <script type="importmap">
-      {
-        "imports": {
-          "@google/generative-ai": "https://esm.run/@google/generative-ai"
-        }
+  <script type="importmap">
+    {
+      "imports": {
+        "@google/generative-ai": "https://esm.run/@google/generative-ai"
       }
-    </script>
+    }
+  </script>
 
   <script type="module">
     import { GoogleGenerativeAI } from "@google/generative-ai";
+
     // Replace 'YOUR_API_KEY' with your actual API key
     const API_KEY = 'AIzaSyAnQWILIuamyHrwmVtp5EtqMGD3zFQC-rM';
     const prompt = "What's different between these pictures?";
@@ -50,61 +51,23 @@
       console.log(text);
     }
 
-    async function processVideo() {
-      const videoInput = document.getElementById('videoInput');
-      const videoPlayer = document.getElementById('videoPlayer');
+    async function processImage() {
+      const imageInput = document.getElementById('imageInput');
+      const imagePreview = document.getElementById('imagePreview');
 
-      // Check if a file is selected
-      if (videoInput.files.length > 0) {
-        const videoFile = videoInput.files[0];
+      // Check if an image is selected
+      if (imageInput.files.length > 0) {
+        const imageFile = imageInput.files[0];
 
-        // Set the video source
-        videoPlayer.src = URL.createObjectURL(videoFile);
+        // Display the image
+        imagePreview.src = URL.createObjectURL(imageFile);
 
-        // Play the video
-        videoPlayer.play();
-
-        // Extract frames from the video
-        const frames = await extractFrames(videoFile);
-
-        // Process frames using the AI model
-        await runAI(frames);
+        // Process the image using the AI model
+        const images = [imageFile];
+        await runAI(images);
       } else {
-        alert('Please select a video file.');
+        alert('Please select an image file.');
       }
-    }
-
-    async function extractFrames(videoFile) {
-      const videoPlayer = document.getElementById('videoPlayer');
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-
-      const frames = [];
-
-      return new Promise((resolve) => {
-        videoPlayer.addEventListener('loadeddata', () => {
-          const { videoWidth, videoHeight } = videoPlayer;
-          canvas.width = videoWidth;
-          canvas.height = videoHeight;
-
-          const fps = 1; // Adjust as needed
-          const interval = 1000 / fps;
-
-          const captureFrame = () => {
-            context.drawImage(videoPlayer, 0, 0, videoWidth, videoHeight);
-            frames.push(canvas.toDataURL('image/jpeg'));
-          };
-
-          const captureInterval = setInterval(captureFrame, interval);
-
-          videoPlayer.addEventListener('ended', () => {
-            clearInterval(captureInterval);
-            resolve(frames);
-          });
-        });
-
-        videoPlayer.src = URL.createObjectURL(videoFile);
-      });
     }
   </script>
 </body>
