@@ -27,7 +27,7 @@ import { marked } from "https://esm.run/marked";
 export async function getGenerativeModel(params) {
   // Fetch API key from server
   // If you need a new API key, get it from https://makersuite.google.com/app/apikey
-  const API_KEY = await (await fetch("API_KEY")).text();
+  const API_KEY = await (await fetch("AIzaSyAnQWILIuamyHrwmVtp5EtqMGD3zFQC-rM")).text();
 
   const genAI = new GoogleGenerativeAI(API_KEY);
 
