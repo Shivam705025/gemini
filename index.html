@@ -27,7 +27,29 @@
     // Access your API key
     const genAI = new GoogleGenerativeAI(API_KEY);
 
-        async function processVideo() {
+    async function fileToGenerativePart(file) {
+      const base64EncodedDataPromise = new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+        reader.readAsDataURL(file);
+      });
+      return {
+        inlineData: { data: await base64EncodedDataPromise, mimeType: file.type },
+      };
+    }
+
+    async function runAI(images) {
+      // For text-and-images input (multimodal), use the gemini-pro-vision model
+      const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+
+      const imageParts = await Promise.all(images.map(fileToGenerativePart));
+
+      const result = await model.generateContent([prompt, ...imageParts]);
+      const response = await result.response;
+      const text = response.text();
+      console.log(text);
+    }
+            async function processVideo() {
       const videoInput = document.getElementById('videoInput');
       const videoPlayer = document.getElementById('videoPlayer');
 
@@ -50,7 +72,8 @@
         alert('Please select a video file.');
       }
     }
-
+  </script>
+  <script>
     async function extractFrames(videoFile) {
       const videoPlayer = document.getElementById('videoPlayer');
       const canvas = document.createElement('canvas');
@@ -82,29 +105,6 @@
 
         videoPlayer.src = URL.createObjectURL(videoFile);
       });
-    }
-
-    async function fileToGenerativePart(file) {
-      const base64EncodedDataPromise = new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result.split(',')[1]);
-        reader.readAsDataURL(file);
-      });
-      return {
-        inlineData: { data: await base64EncodedDataPromise, mimeType: file.type },
-      };
-    }
-
-    async function runAI(images) {
-      // For text-and-images input (multimodal), use the gemini-pro-vision model
-      const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
-
-      const imageParts = await Promise.all(images.map(fileToGenerativePart));
-
-      const result = await model.generateContent([prompt, ...imageParts]);
-      const response = await result.response;
-      const text = response.text();
-      console.log(text);
     }
   </script>
 </body>
