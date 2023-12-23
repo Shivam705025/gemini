@@ -6,13 +6,7 @@
   <title>Video Analysis</title>
 </head>
 <body>
-  <input type="file" accept="video/*" id="videoInput" />
-  <video controls id="videoPlayer" style="width: 100%; max-width: 800px;"></video>
-  <button onclick="processVideo()">Process Video</button>
-  <br>
-  Result: <textarea id="resultTextArea" style="width: 100%; max-width: 800px; height: 100px;"></textarea>
-
-  <script type="importmap">
+    <script type="importmap">
     {
       "imports": {
         "@google/generative-ai": "https://esm.run/@google/generative-ai"
@@ -20,6 +14,11 @@
     }
   </script>
 
+  <input type="file" accept="video/*" id="videoInput" />
+  <video controls id="videoPlayer" style="width: 100%; max-width: 800px;"></video>
+  <button onclick="processVideo()">Process Video</button>
+  <br>
+  Result: <textarea id="resultTextArea" style="width: 100%; max-width: 800px; height: 100px;"></textarea>
   <script type="module">
     import { GoogleGenerativeAI } from "@google/generative-ai";
 
