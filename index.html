@@ -52,33 +52,34 @@
     
   </script>
   <script>
-async function processVideo() {
-  const imageInput = document.getElementById('imageInput');
-  const imagePreview = document.getElementById('imagePreview');
-  const videoPlayer = document.getElementById('videoPlayer');
+    async function processVideo() {
+      const videoInput = document.getElementById('videoInput');
+      const videoPlayer = document.getElementById('videoPlayer');
 
-  // Reset the video source and pause it
-  videoPlayer.src = '';
-  videoPlayer.pause();
+      // Reset the video source and pause it
+      videoPlayer.src = '';
+      videoPlayer.pause();
 
-  // Check if an image is selected
-  if (imageInput.files.length > 0) {
-    const imageFile = imageInput.files[0];
+      // Check if a video is selected
+      if (videoInput.files.length > 0) {
+        const videoFile = videoInput.files[0];
 
-    // Display the image
-    imagePreview.src = URL.createObjectURL(imageFile);
+        // Set the video source
+        videoPlayer.src = URL.createObjectURL(videoFile);
 
-    // Reset the video source and pause it again
-    videoPlayer.src = '';
-    videoPlayer.pause();
+        // Play the video
+        videoPlayer.play();
 
-    // Process the image using the AI model
-    const images = [imageFile];
-    await runAI(images);
-  } else {
-    alert('Please select an image file.');
-  }
-}
+        // Extract frames from the video
+        const frames = await extractFrames(videoFile);
+
+        // Process frames using the AI model
+        await runAI(frames);
+      } else {
+        alert('Please select a video file.');
+      }
+    }
+
 
     async function extractFrames(videoFile) {
       const videoPlayer = document.getElementById('videoPlayer');
