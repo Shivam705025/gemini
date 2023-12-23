@@ -1,91 +1,110 @@
-<!doctype html>
-<!--
- * @license
- * Copyright 2023 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
--->
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <link rel="shortcut icon" type="image/svg+xml" href="favicon.svg" />
-    <link rel="stylesheet" href="utils/main.css" />
-    <link
-      href="https://fonts.googleapis.com/css?family=Roboto:400,700"
-      rel="stylesheet"
-      type="text/css"
-    />
-    <title>Generative AI - Text and Image</title>
-  </head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Analysis</title>
+</head>
+<body>
+  <input type="file" accept="video/*" id="videoInput" />
+  <video controls id="videoPlayer" style="width: 100%; max-width: 800px;"></video>
+  <button onclick="processVideo()">Process Video</button>
 
-  <body>
-    <header>Generative AI - Text and Image</header>
-    <div class="form-container">
-      <form id="form">
-        <input type="file" id="file'" multiple />
-        <input id="prompt" />
-        <button type="submit">Send</button>
-      </form>
-      <div id="thumbnails"></div>
-    </div>
-    <div class="container">
-      <blockquote id="result"></blockquote>
-    </div>
-
-    <script type="module">
-      import {
-        getGenerativeModel,
-        fileToGenerativePart,
-        updateUI,
-      } from "./utils/shared.js";
-
-      async function run(prompt, files) {
-        const imageParts = await Promise.all(
-          [...files].map(fileToGenerativePart),
-        );
-
-        const model = await getGenerativeModel({
-          model: imageParts.length ? "gemini-pro-vision" : "gemini-pro",
-        });
-
-        return model.generateContentStream([...imageParts, prompt]);
-      }
-
-      const fileInputEl = document.querySelector("input[type=file]");
-      const thumbnailsEl = document.querySelector("#thumbnails");
-
-      fileInputEl.addEventListener("input", () => {
-        thumbnailsEl.innerHTML = "";
-        for (const file of fileInputEl.files) {
-          const url = URL.createObjectURL(file);
-          thumbnailsEl.innerHTML += `<img class="thumb" src="${url}" onload="window.URL.revokeObjectURL(this.src)" />`;
+      <script type="importmap">
+      {
+        "imports": {
+          "@google/generative-ai": "https://esm.run/@google/generative-ai"
         }
-      });
-
-      document
-        .querySelector("#form")
-        .addEventListener("submit", async (event) => {
-          event.preventDefault();
-
-          const promptEl = document.querySelector("#prompt");
-          const resultEl = document.querySelector("#result");
-
-          updateUI(
-            resultEl,
-            () => run(promptEl.value, fileInputEl.files),
-            true,
-          );
-        });
+      }
     </script>
-  </body>
+
+  <script type="module">
+    // Replace 'YOUR_API_KEY' with your actual API key
+    const API_KEY = 'AIzaSyAnQWILIuamyHrwmVtp5EtqMGD3zFQC-rM';
+    const prompt = "What's different between these pictures?";
+
+    // Access your API key
+    const genAI = new GoogleGenerativeAI(API_KEY);
+
+    async function fileToGenerativePart(file) {
+      const base64EncodedDataPromise = new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+        reader.readAsDataURL(file);
+      });
+      return {
+        inlineData: { data: await base64EncodedDataPromise, mimeType: file.type },
+      };
+    }
+
+    async function runAI(images) {
+      // For text-and-images input (multimodal), use the gemini-pro-vision model
+      const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+
+      const imageParts = await Promise.all(images.map(fileToGenerativePart));
+
+      const result = await model.generateContent([prompt, ...imageParts]);
+      const response = await result.response;
+      const text = response.text();
+      console.log(text);
+    }
+
+    async function processVideo() {
+      const videoInput = document.getElementById('videoInput');
+      const videoPlayer = document.getElementById('videoPlayer');
+
+      // Check if a file is selected
+      if (videoInput.files.length > 0) {
+        const videoFile = videoInput.files[0];
+
+        // Set the video source
+        videoPlayer.src = URL.createObjectURL(videoFile);
+
+        // Play the video
+        videoPlayer.play();
+
+        // Extract frames from the video
+        const frames = await extractFrames(videoFile);
+
+        // Process frames using the AI model
+        await runAI(frames);
+      } else {
+        alert('Please select a video file.');
+      }
+    }
+
+    async function extractFrames(videoFile) {
+      const videoPlayer = document.getElementById('videoPlayer');
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+
+      const frames = [];
+
+      return new Promise((resolve) => {
+        videoPlayer.addEventListener('loadeddata', () => {
+          const { videoWidth, videoHeight } = videoPlayer;
+          canvas.width = videoWidth;
+          canvas.height = videoHeight;
+
+          const fps = 1; // Adjust as needed
+          const interval = 1000 / fps;
+
+          const captureFrame = () => {
+            context.drawImage(videoPlayer, 0, 0, videoWidth, videoHeight);
+            frames.push(canvas.toDataURL('image/jpeg'));
+          };
+
+          const captureInterval = setInterval(captureFrame, interval);
+
+          videoPlayer.addEventListener('ended', () => {
+            clearInterval(captureInterval);
+            resolve(frames);
+          });
+        });
+
+        videoPlayer.src = URL.createObjectURL(videoFile);
+      });
+    }
+  </script>
+</body>
 </html>
