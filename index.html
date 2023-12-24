@@ -69,7 +69,7 @@
 
       // Load metadata to get video duration (optional)
       await videoPlayer.load();
-
+      await runAI(videoFile);
       // Extract frames from the video
       const frames = await extractFrames(videoFile);
 
