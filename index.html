@@ -40,14 +40,13 @@
     };
   }
 
-
-  async function runAI(images) {
+  async function runAI(frame) {
     // For text-and-images input (multimodal), use the gemini-pro-vision model
     const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
 
-    const imageParts = await Promise.all(images.map(fileToGenerativePart));
+    const imagePart = await fileToGenerativePart(frame);
 
-    const result = await model.generateContent([prompt, ...imageParts]);
+    const result = await model.generateContent([prompt, imagePart]);
     const response = await result.response;
     const text = response.text();
     return text;
@@ -74,11 +73,11 @@
       // Extract frames from the video
       const frames = await extractFrames(videoFile);
 
-      // Process frames using the AI model
-      const result = await runAI(frames);
+      // Process each frame using the AI model
+      const results = await Promise.all(frames.map(runAI));
 
       // Display result in the text area
-      resultTextArea.value = result;
+      resultTextArea.value = results.join('\n');
 
       // Play the video
       videoPlayer.play();
@@ -121,7 +120,7 @@
   }
 
   // Attach the event listener to the button
-  const processButton = document.querySelector('button');
+  const processButton = document.getElementById('processButton');
   processButton.addEventListener('click', processVideo);
 </script>
 </body>
