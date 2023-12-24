@@ -29,25 +29,16 @@
   // Access your API key
   const genAI = new GoogleGenerativeAI(API_KEY);
 
-async function fileToGenerativePart(file) {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-
-    reader.onloadend = () => {
-      // Ensure that the result is a Data URL
-      if (reader.result.startsWith('data:')) {
-        resolve({
-          inlineData: { data: reader.result.split(',')[1], mimeType: file.type },
-        });
-      } else {
-        console.error('Error reading file as Data URL.');
-        resolve(null);
-      }
+  async function fileToGenerativePart(file) {
+    const base64EncodedDataPromise = new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result.split(',')[1]);
+      reader.readAsDataURL(file);
+    });
+    return {
+      inlineData: { data: await base64EncodedDataPromise, mimeType: file.type },
     };
-
-    reader.readAsDataURL(file);
-  });
-}
+  }
 
 
   async function runAI(images) {
