@@ -21,39 +21,6 @@
   </script>
 
   <script type="module">
-        async function processVideo() {
-      const videoInput = document.getElementById('videoInput');
-      const videoPlayer = document.getElementById('videoPlayer');
-      const resultTextArea = document.getElementById('resultTextArea');
-
-      // Check if a video is selected
-      if (videoInput.files.length > 0) {
-        const videoFile = videoInput.files[0];
-
-        // Pause the video
-        videoPlayer.pause();
-
-        // Set the video source
-        videoPlayer.src = URL.createObjectURL(videoFile);
-
-        // Load metadata to get video duration (optional)
-        await videoPlayer.load();
-
-        // Extract frames from the video
-        const frames = await extractFrames(videoFile);
-
-        // Process frames using the AI model
-        const result = await runAI(frames);
-
-        // Display result in the text area
-        resultTextArea.value = result;
-
-        // Play the video
-        videoPlayer.play();
-      } else {
-        alert('Please select a video file.');
-      }
-    }
     import { GoogleGenerativeAI } from "@google/generative-ai";
 
     const API_KEY = 'AIzaSyAnQWILIuamyHrwmVtp5EtqMGD3zFQC-rM';
